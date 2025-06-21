@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import { Event } from '@/lib/dummy-data';
+import { Event } from '@/types';
 import { formatCurrency } from '@/utils/formatCurrency';
 
 interface EventCardProps {
@@ -8,11 +8,13 @@ interface EventCardProps {
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
+  const imageUrl = event.image_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=800&h=600&auto=format&fit=crop';
+
   return (
     <Link href={`/events/${event.id}`}>
       <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1">
         <div className="relative">
-          <img className="w-full h-48 object-cover" src={event.image_url} alt={event.title} />
+          <img className="w-full h-48 object-cover" src={imageUrl} alt={event.title} />
           {event.sold_out && (
             <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
               Sold Out

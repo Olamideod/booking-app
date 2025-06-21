@@ -10,7 +10,7 @@ module.exports = {
       colors: {
         'dark-purple': '#231F42',
         'accent-purple': '#7C5CFC',
-        'light-bg': '#F9F9F9',
+        'light-bg': '#FFFFFF',
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
