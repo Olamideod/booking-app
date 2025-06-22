@@ -7,7 +7,7 @@ import { FormEvent, useState } from 'react';
 export default function Search() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [query, setQuery] = useState(searchParams.get('q') || '');
+  const [query, setQuery] = useState(searchParams?.get('q') || '');
 
   const handleSearch = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();

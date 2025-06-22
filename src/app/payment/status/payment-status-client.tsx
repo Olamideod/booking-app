@@ -6,8 +6,8 @@ import { useSearchParams } from 'next/navigation';
 
 export default function PaymentStatusClient() {
   const searchParams = useSearchParams();
-  const status = searchParams.get('status');
-  const trxref = searchParams.get('trxref');
+  const status = searchParams?.get('status');
+  const trxref = searchParams?.get('trxref');
 
   let title = 'Payment Status';
   let message = 'Your payment status is being confirmed. Please wait.';
