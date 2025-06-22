@@ -1,26 +1,28 @@
 import { createClient } from '@/lib/supabase/server';
-import React from 'react';
+import React, { Suspense } from 'react';
 import { dummyEvents } from '@/lib/dummy-data';
 import type { Event } from '@/types';
 import EventsPageClient from '@/components/EventsPageClient';
+import AnimatedPage from '@/components/AnimatedPage';
 
 // We're not using revalidate or no-store here for now,
 // allowing Next.js to cache the page.
 // The dynamic searchParams will still make the page dynamic.
 
 interface EventsPageProps {
-  searchParams?: {
+  searchParams?: Promise<{
     filter?: string;
     q?: string;
-  };
+  }>;
 }
 
 const EventsPage = async ({ searchParams }: EventsPageProps) => {
-  const supabase = createClient();
-  const filter = searchParams?.filter;
-  const searchQuery = searchParams?.q;
+  const params = searchParams ? await searchParams : {};
+  const filter = params.filter;
+  const searchQuery = params.q;
   const now = new Date().toISOString();
 
+  const supabase = createClient();
   let query = supabase.from('events').select('*');
 
   // Apply filters based on search param
@@ -57,7 +59,13 @@ const EventsPage = async ({ searchParams }: EventsPageProps) => {
     events = filteredDummyEvents as Event[];
   }
 
-  return <EventsPageClient events={events} searchQuery={searchQuery} />;
+  return (
+    <AnimatedPage>
+      <Suspense fallback={<div>Loading events...</div>}>
+        <EventsPageClient events={events} searchQuery={searchQuery} />
+      </Suspense>
+    </AnimatedPage>
+  );
 };
 
 export default EventsPage;
