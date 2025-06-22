@@ -8,11 +8,12 @@ export const revalidate = 60; // Revalidate every 60 seconds
 
 async function FeaturedEvents() {
   const supabase = createClient();
-  let { data: events, error } = await supabase
+  const { data, error } = await supabase
     .from('events')
     .select('*')
     .eq('featured', true)
     .limit(3);
+  let events = data;
 
   if (error) {
     console.error('Error fetching featured events:', error.message);
@@ -27,7 +28,7 @@ async function FeaturedEvents() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       {events.map(event => (
-        <EventCard key={event.id} event={event as any} />
+        <EventCard key={event.id} event={event} />
       ))}
     </div>
   );

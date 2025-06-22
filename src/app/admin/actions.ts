@@ -4,7 +4,11 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-export async function createEvent(prevState: any, formData: FormData) {
+interface FormState {
+  message: string | null;
+}
+
+export async function createEvent(prevState: FormState, formData: FormData) {
   const supabase = createClient();
 
   const { data: { user } } = await supabase.auth.getUser();

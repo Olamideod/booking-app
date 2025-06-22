@@ -38,7 +38,8 @@ const EventsPage = async ({ searchParams }: EventsPageProps) => {
     query = query.or(`title.ilike.%${cleanedQuery}%,description.ilike.%${cleanedQuery}%`);
   }
 
-  let { data: events, error } = await query.order('date', { ascending: filter !== 'past' });
+  const { data, error } = await query.order('date', { ascending: filter !== 'past' });
+  let events = data;
 
   if (error) {
     console.error('Error fetching events:', error);

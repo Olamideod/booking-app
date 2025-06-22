@@ -2,6 +2,18 @@ import { createClient } from '@/lib/supabase/server';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
+import type { Event } from '@/types';
+
+// Define a more specific type for the order based on the query
+type OrderWithEvent = {
+  id: number;
+  created_at: string;
+  quantity: number;
+  total_price: number;
+  status: string;
+  events: Pick<Event, 'id' | 'title' | 'date' | 'image_url' | 'location'>[] | null;
+};
 
 export default async function MyOrdersPage() {
   const supabase = createClient();
@@ -41,7 +53,7 @@ export default async function MyOrdersPage() {
   }
 
   // Helper to safely get the event object
-  const getEvent = (order: any) => {
+  const getEvent = (order: OrderWithEvent) => {
     if (!order.events) return null;
     return Array.isArray(order.events) ? order.events[0] : order.events;
   };
@@ -52,12 +64,14 @@ export default async function MyOrdersPage() {
       <div className="space-y-6">
         {orders && orders.length > 0 ? (
           orders.map(order => {
-            const event = getEvent(order);
+            const event = getEvent(order as OrderWithEvent);
             return (
               <div key={order.id} className="bg-white p-6 rounded-lg shadow-md border flex flex-col sm:flex-row items-start space-y-4 sm:space-y-0 sm:space-x-6">
-                <img
+                <Image
                   src={event?.image_url || '/placeholder.png'}
                   alt={event?.title || 'Event Image'}
+                  width={128}
+                  height={128}
                   className="w-full sm:w-32 h-32 object-cover rounded-md"
                 />
                 <div className="flex-grow">
