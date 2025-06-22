@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { X } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
+// Auth Modal props
 interface AuthModalProps {
   onClose: () => void;
 }
