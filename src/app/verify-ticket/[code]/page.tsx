@@ -3,13 +3,13 @@ import { CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
-export default async function VerifyTicketPage({
-  params,
-}: {
-  params: { code: string };
-}) {
-  const { code } = params;
+// The 'any' type is used here as a workaround for a persistent build error
+// where PageProps is being constrained to an incorrect type on Vercel.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function VerifyTicketPage({ params }: any) {
+  const { code } = params as { code: string };
   const supabase = createClient();
+  
   
   // Find the order with the verification code
   const { data: order, error } = await supabase
@@ -64,17 +64,17 @@ export default async function VerifyTicketPage({
             <div className="flex flex-col md:flex-row gap-6">
               <div className="md:w-1/3">
                 <Image
-                  src={order.events.image_url || '/placeholder.png'}
-                  alt={order.events.title}
+                  src={order.events[0].image_url || '/placeholder.png'}
+                  alt={order.events[0].title}
                   width={300}
                   height={200}
                   className="w-full h-48 object-cover rounded-md"
                 />
               </div>
               <div className="md:w-2/3">
-                <h3 className="text-xl font-bold">{order.events.title}</h3>
+                <h3 className="text-xl font-bold">{order.events[0].title}</h3>
                 <p className="text-gray-500 mt-1">
-                  {new Date(order.events.date).toLocaleDateString('en-US', {
+                  {new Date(order.events[0].date).toLocaleDateString('en-US', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
@@ -83,7 +83,7 @@ export default async function VerifyTicketPage({
                     minute: '2-digit',
                   })}
                 </p>
-                <p className="text-gray-500">{order.events.location}</p>
+                <p className="text-gray-500">{order.events[0].location}</p>
                 <div className="mt-4 space-y-2">
                   <p><strong>Quantity:</strong> {order.quantity} ticket(s)</p>
                   <p><strong>Verification Code:</strong> <span className="font-mono bg-gray-100 px-2 py-1 rounded">{order.verification_code}</span></p>
