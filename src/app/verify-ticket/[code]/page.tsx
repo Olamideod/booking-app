@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server';
-import { formatCurrency } from '@/utils/formatCurrency';
 import { CheckCircle, XCircle } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';

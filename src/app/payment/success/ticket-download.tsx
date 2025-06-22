@@ -2,14 +2,26 @@
 
 import { Download, Printer } from 'lucide-react';
 import { useRef } from 'react';
-import QRCode from 'qrcode.react';
+import { QRCodeSVG } from 'qrcode.react';
 import { formatCurrency } from '@/utils/formatCurrency';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import { Event } from '@/types';
+
+interface Order {
+  id: number;
+  created_at: string;
+  quantity: number;
+  total_amount: number;
+  status: string;
+  verification_code: string;
+  payment_ref: string;
+  events: Event;
+}
 
 interface TicketDownloadProps {
-  order: any;
-  event: any;
+  order: Order;
+  event: Event;
 }
 
 export default function TicketDownload({ order, event }: TicketDownloadProps) {
@@ -108,7 +120,7 @@ export default function TicketDownload({ order, event }: TicketDownloadProps) {
             </div>
             
             <div className="mt-4 md:mt-0">
-              <QRCode 
+              <QRCodeSVG 
                 value={`${process.env.NEXT_PUBLIC_APP_URL || 'https://booking-app.com'}/verify-ticket/${order.verification_code}`} 
                 size={128}
                 level="H"
