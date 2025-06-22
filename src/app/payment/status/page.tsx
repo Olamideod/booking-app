@@ -23,11 +23,12 @@ function LoadingState() {
   );
 }
 
-export default async function PaymentStatusPage({
-  searchParams,
-}: {
+interface PageProps {
+  params: { [key: string]: string };
   searchParams: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export default async function PaymentStatusPage({ searchParams }: PageProps) {
   // Get the reference from the query params
   const reference = searchParams.reference as string;
   const trxref = searchParams.trxref as string;
