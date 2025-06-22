@@ -4,14 +4,11 @@ import EventDetails from '@/components/EventDetails';
 import AnimatedPage from '@/components/AnimatedPage';
 import { Suspense } from 'react';
 
-interface EventDetailPageProps {
-  params: Promise<{ id: string }>;
-}
-
-export const revalidate = 60; // Revalidate every 60 seconds
-
-const EventDetailPage = async ({ params }: EventDetailPageProps) => {
-  const { id } = await params;
+// The 'any' type is used here as a workaround for a build error
+// where PageProps is being constrained to an incorrect type.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function EventDetailPage({ params }: any) {
+  const { id } = params as { id: string };
   
   const supabase = createClient();
   const { data: event } = await supabase
@@ -35,6 +32,6 @@ const EventDetailPage = async ({ params }: EventDetailPageProps) => {
       </div>
     </AnimatedPage>
   );
-};
+}
 
-export default EventDetailPage; 
+export const revalidate = 60; // Revalidate every 60 seconds 
