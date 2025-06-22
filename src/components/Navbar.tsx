@@ -16,7 +16,7 @@ export default function Navbar() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
-    if (searchParams.get('error') === 'unauthenticated') {
+    if (searchParams && searchParams.get('error') === 'unauthenticated') {
       setShowAuthModal(true);
     }
   }, [searchParams, setShowAuthModal]);
