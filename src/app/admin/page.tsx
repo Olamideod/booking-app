@@ -4,6 +4,7 @@ import EventForm from '@/components/EventForm';
 import { deleteEvent } from './actions';
 import { Trash2 } from 'lucide-react';
 
+
 export default async function AdminPage() {
   const supabase = createClient();
 
@@ -23,13 +24,13 @@ export default async function AdminPage() {
     <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
         <div className="md:col-span-1">
-          <h2 className="text-3xl font-bold text-dark-purple mb-6">Create New Event</h2>
+          <h2 className="text-3xl font-bold text-black mb-6">Create New Event</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <EventForm />
           </div>
         </div>
         <div className="md:col-span-2">
-          <h2 className="text-3xl font-bold text-dark-purple mb-6">Manage Existing Events</h2>
+          <h2 className="text-3xl font-bold text-black mb-6">Manage Existing Events</h2>
           <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
             {events?.map(event => (
               <div key={event.id} className="flex items-center justify-between border-b pb-2">
