@@ -26,11 +26,6 @@ function LoadingState() {
 // The 'any' type is used here as a workaround for a persistent build error
 // where PageProps is being constrained to an incorrect type on Vercel.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-interface PageProps {
-  params: { [key: string]: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
 export default async function PaymentStatusPage({ searchParams }: any) {
   // Get the reference from the query params
   const reference = searchParams.reference as string;

@@ -79,6 +79,7 @@ export default async function PaymentSuccessPage({ searchParams }: any) {
           </div>
           
           <div className="flex flex-col items-center">
+            {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
             <TicketDownload order={order as any} event={event as any} />
             
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center w-full">
