@@ -1,4 +1,6 @@
-import { createClient } from '@supabase/supabase-js'
+import { createServerClient, type CookieOptions } from '@supabase/ssr';
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
+import { cookies } from 'next/headers';
 
 // Instructions for Supabase Service Role Key:
 // 1. Go to your Supabase project dashboard.
@@ -9,7 +11,10 @@ import { createClient } from '@supabase/supabase-js'
 
 // This client is for server-side use ONLY, in places like webhooks or background jobs
 // where you need to bypass Row Level Security.
-export const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-); 
+// It uses the service role key, so it has admin privileges.
+export const createClient = () => {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+  );
+} 

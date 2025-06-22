@@ -1,6 +1,8 @@
 'use client';
 
+import { deleteEvent } from '@/app/actions/eventActions';
 import { useAuth } from '@/context/AuthContext';
+// import { getStripe } from '@/lib/stripe/client';
 import type { Event } from '@/types';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { Minus, Plus, Edit, Trash2 } from 'lucide-react';
@@ -32,26 +34,46 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event }) => {
     setIsLoading(true);
     setError(null);
 
-    const response = await fetch('/api/paystack/initialize', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        eventId: event.id,
-        quantity,
-      }),
-    });
+    try {
+      // 1. Call your backend to initialize the Paystack transaction
+      const response = await fetch('/api/paystack/initialize', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          eventId: event.id,
+          quantity,
+        }),
+      });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      setError(errorData.message || 'Payment initialization failed. Please try again.');
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(errorData || 'Payment initialization failed.');
+      }
+
+      // 2. Redirect the user to the Paystack checkout page
+      const { authorization_url } = await response.json();
+      if (authorization_url) {
+        window.location.href = authorization_url;
+      } else {
+        throw new Error('Could not retrieve payment URL.');
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An unexpected error occurred.');
       setIsLoading(false);
-      return;
     }
+  };
 
-    const { authorization_url } = await response.json();
-    window.location.href = authorization_url;
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to permanently delete this event? This action cannot be undone.')) {
+      try {
+        await deleteEvent(event.id);
+        // The server action will handle the redirect
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete event.');
+      }
+    }
   };
   
   const imageUrl = event.image_url || 'https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?q=80&w=1200&h=800&auto=format&fit=crop';
@@ -69,7 +91,7 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event }) => {
                 <span>Edit</span>
               </Link>
               <button
-                // onClick={handleDelete} // We will implement this next
+                onClick={handleDelete}
                 className="flex items-center space-x-2 text-xs p-2 rounded-md bg-red-100 text-red-800 hover:bg-red-200"
               >
                 <Trash2 size={14} />

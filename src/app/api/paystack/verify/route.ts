@@ -1,65 +1,59 @@
-import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { supabaseAdmin } from '@/lib/supabase/admin';
+import { NextResponse } from 'next/server';
+import { createClient } from '@/lib/supabase/admin'; // Use the admin client to bypass RLS
 
 export async function POST(request: Request) {
-  const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY!;
-  
-  // 1. Verify the webhook signature
-  const body = await request.text();
+  const paystackSecret = process.env.PAYSTACK_SECRET_KEY!;
   const signature = request.headers.get('x-paystack-signature');
   
+  const body = await request.text();
+
   const hash = crypto
-    .createHmac('sha512', paystackSecretKey)
+    .createHmac('sha512', paystackSecret)
     .update(body)
     .digest('hex');
 
   if (hash !== signature) {
-    console.warn('Paystack signature mismatch. Unauthorized.');
-    return new NextResponse('Signature mismatch', { status: 401 });
+    console.warn('Paystack signature verification failed.');
+    return new NextResponse('Signature verification failed', { status: 401 });
   }
 
-  // 2. Parse the event data
   const event = JSON.parse(body);
 
-  // 3. Check for successful charge and create order
   if (event.event === 'charge.success') {
-    const { user_id, event_id, quantity } = event.data.metadata;
-    const amount = event.data.amount / 100; // Convert from kobo to main currency unit
-
-    if (!user_id || !event_id || !quantity) {
-      console.error('Webhook metadata is missing required fields.', event.data.metadata);
-      return new NextResponse('Webhook metadata missing', { status: 400 });
+    const { reference, amount, customer, metadata } = event.data;
+    
+    // Ensure metadata exists and contains our custom fields
+    if (!metadata || !metadata.user_id || !metadata.event_id || !metadata.quantity) {
+      console.error('Webhook received with missing metadata:', metadata);
+      // Still return 200 to acknowledge receipt, but log the error.
+      return new NextResponse('Missing metadata', { status: 200 });
     }
+    
+    const supabaseAdmin = createClient();
 
-    try {
-      const { data, error } = await supabaseAdmin
-        .from('orders')
-        .insert({
-          user_id,
-          event_id,
-          quantity,
-          status: 'confirmed',
-          total_price: amount,
-        });
+    const newOrder = {
+      user_id: metadata.user_id,
+      event_id: metadata.event_id,
+      quantity: metadata.quantity,
+      status: 'paid',
+      total_amount: amount / 100, // Convert from kobo back to main currency
+      payment_provider: 'paystack',
+      payment_ref: reference,
+      customer_email: customer.email,
+    };
 
-      if (error) {
-        console.error('Error creating order in Supabase:', error);
-        return new NextResponse(`Supabase error: ${error.message}`, { status: 500 });
-      }
+    const { error: insertError } = await supabaseAdmin
+      .from('orders')
+      .insert(newOrder);
 
-      // TODO: Email confirmation logic
-      // You can trigger a Supabase Edge Function or use a service like Resend/SendGrid
-      // to send a confirmation email to the user.
-      // Example: await sendConfirmationEmail(event.data.customer.email, event_id);
-
-    } catch (e) {
-      const error = e as Error;
-      console.error('An unexpected error occurred:', error.message);
-      return new NextResponse(`Unexpected error: ${error.message}`, { status: 500 });
+    if (insertError) {
+      console.error('Failed to insert order into database:', insertError);
+      // Even if DB insert fails, we must return 200 to Paystack to prevent retries
+    } else {
+      console.log(`Successfully created order for event ${metadata.event_id} for user ${metadata.user_id}`);
     }
   }
 
-  // 4. Acknowledge receipt of the webhook
-  return NextResponse.json({ status: 'success' });
+  return new NextResponse('Webhook received', { status: 200 });
 } 
