@@ -8,10 +8,10 @@ export default function EventFilters() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const currentFilter = searchParams.get('filter') || 'All';
+  const currentFilter = searchParams?.get('filter') || 'All';
 
   const handleFilterChange = (filter: string) => {
-    const params = new URLSearchParams(searchParams);
+    const params = new URLSearchParams(searchParams ? searchParams.toString() : '');
     if (filter === 'All') {
       params.delete('filter');
     } else {
