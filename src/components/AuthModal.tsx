@@ -18,7 +18,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   useEffect(() => {
     // Set up auth state change listener to redirect after successful auth
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+      if (event === 'INITIAL_SESSION') {
         // Close the modal
         onClose();
         // Redirect to profile page
