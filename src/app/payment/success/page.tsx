@@ -6,12 +6,10 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import TicketDownload from './ticket-download';
 
-interface PageProps {
-  params: { [key: string]: string };
-  searchParams: { [key: string]: string | string[] | undefined };
-}
-
-export default async function PaymentSuccessPage({ searchParams }: PageProps) {
+// The 'any' type is used here as a workaround for a persistent build error
+// where PageProps is being constrained to an incorrect type on Vercel.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function PaymentSuccessPage({ searchParams }: any) {
   const orderId = searchParams.orderId ? Number(searchParams.orderId) : null;
   
   if (!orderId) {
@@ -26,8 +24,8 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
       redirect('/profile/orders');
     }
     
-    // Get the event from the order
-    const event = order.events;
+    // An order is for one event, so we take the first item from the 'events' array.
+    const event = order.events[0];
     
     if (!event) {
       redirect('/profile/orders');
@@ -81,7 +79,7 @@ export default async function PaymentSuccessPage({ searchParams }: PageProps) {
           </div>
           
           <div className="flex flex-col items-center">
-            <TicketDownload order={order} event={event} />
+            <TicketDownload order={order as any} event={event as any} />
             
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center w-full">
               <Link

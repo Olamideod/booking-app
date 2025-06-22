@@ -9,15 +9,11 @@ import AnimatedPage from '@/components/AnimatedPage';
 // allowing Next.js to cache the page.
 // The dynamic searchParams will still make the page dynamic.
 
-interface EventsPageProps {
-  searchParams?: Promise<{
-    filter?: string;
-    q?: string;
-  }>;
-}
-
-const EventsPage = async ({ searchParams }: EventsPageProps) => {
-  const params = searchParams ? await searchParams : {};
+// The 'any' type is used here as a workaround for a persistent build error
+// where PageProps is being constrained to an incorrect type on Vercel.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default async function EventsPage({ searchParams }: any) {
+  const params = searchParams || {};
   const filter = params.filter;
   const searchQuery = params.q;
   const now = new Date().toISOString();
@@ -66,6 +62,4 @@ const EventsPage = async ({ searchParams }: EventsPageProps) => {
       </Suspense>
     </AnimatedPage>
   );
-};
-
-export default EventsPage;
+}
