@@ -2,6 +2,12 @@ import crypto from 'crypto';
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/admin'; // Use the admin client to bypass RLS
 
+// Generate a unique verification code for tickets
+function generateVerificationCode(): string {
+  // Create a random 8-character alphanumeric code
+  return crypto.randomBytes(4).toString('hex').toUpperCase();
+}
+
 export async function POST(request: Request) {
   const paystackSecret = process.env.PAYSTACK_SECRET_KEY!;
   const signature = request.headers.get('x-paystack-signature');
@@ -32,6 +38,21 @@ export async function POST(request: Request) {
     
     const supabaseAdmin = createClient();
 
+    // Check if the order already exists to avoid duplicates
+    const { data: existingOrder } = await supabaseAdmin
+      .from('orders')
+      .select('id')
+      .eq('payment_ref', reference)
+      .single();
+
+    if (existingOrder) {
+      console.log(`Order with reference ${reference} already exists.`);
+      return new NextResponse('Order already processed', { status: 200 });
+    }
+
+    // Generate a unique verification code for the ticket
+    const verification_code = generateVerificationCode();
+
     const newOrder = {
       user_id: metadata.user_id,
       event_id: metadata.event_id,
@@ -41,6 +62,7 @@ export async function POST(request: Request) {
       payment_provider: 'paystack',
       payment_ref: reference,
       customer_email: customer.email,
+      verification_code,
     };
 
     const { error: insertError } = await supabaseAdmin

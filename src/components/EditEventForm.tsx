@@ -4,6 +4,7 @@ import { updateEvent } from '@/app/actions/eventActions';
 import type { Event } from '@/types';
 import { useFormStatus } from 'react-dom';
 import { useState } from 'react';
+import { Upload, Link as LinkIcon } from 'lucide-react';
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -49,6 +50,7 @@ function FormInput({ id, label, type = 'text', required = true, defaultValue, pl
 
 export default function EditEventForm({ event }: { event: Event }) {
   const [error, setError] = useState<string | null>(null);
+  const [imageUploadType, setImageUploadType] = useState<'url' | 'file'>('url');
 
   const handleSubmit = async (formData: FormData) => {
     setError(null);
@@ -60,7 +62,7 @@ export default function EditEventForm({ event }: { event: Event }) {
   };
 
   return (
-    <form action={handleSubmit} className="space-y-6">
+    <form action={handleSubmit} className="space-y-6" encType="multipart/form-data">
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-md">
           <p>{error}</p>
@@ -68,18 +70,6 @@ export default function EditEventForm({ event }: { event: Event }) {
       )}
 
       <FormInput id="title" label="Event Title" defaultValue={event.title} />
-      
-      <div>
-        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">Description</label>
-        <textarea
-          id="description"
-          name="description"
-          rows={4}
-          required
-          defaultValue={event.description ?? ''}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-accent-purple focus:border-accent-purple"
-        ></textarea>
-      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <FormInput
@@ -96,7 +86,70 @@ export default function EditEventForm({ event }: { event: Event }) {
         <FormInput id="currency" label="Currency" defaultValue={event.currency} />
       </div>
 
-      <FormInput id="image_url" label="Image URL" type="url" required={false} defaultValue={event.image_url} />
+      {/* Image Upload Section */}
+      <div>
+        <label className="block text-sm font-medium text-gray-900 mb-3">
+          Event Image
+        </label>
+        
+        <div className="flex space-x-4 mb-4">
+          <button
+            type="button"
+            onClick={() => setImageUploadType('url')}
+            className={`px-3 py-2 rounded-md flex items-center gap-2 ${
+              imageUploadType === 'url' ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gray-100'
+            }`}
+          >
+            <LinkIcon size={16} />
+            Image URL
+          </button>
+          
+          <button
+            type="button"
+            onClick={() => setImageUploadType('file')}
+            className={`px-3 py-2 rounded-md flex items-center gap-2 ${
+              imageUploadType === 'file' ? 'bg-purple-100 text-purple-700 border border-purple-300' : 'bg-gray-100'
+            }`}
+          >
+            <Upload size={16} />
+            Upload Image
+          </button>
+        </div>
+        
+        {imageUploadType === 'url' ? (
+          <div>
+            <input
+              id="image_url"
+              name="image_url"
+              type="url"
+              defaultValue={event.image_url || ''}
+              placeholder="https://..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 shadow-sm focus:ring-accent-purple focus:border-accent-purple"
+            />
+            <p className="text-xs text-gray-500 mt-1">Enter a direct URL to an image (JPG, PNG, or WebP)</p>
+          </div>
+        ) : (
+          <div>
+            <div className="border-2 border-dashed border-gray-300 rounded-md p-6 flex flex-col items-center">
+              <Upload className="h-8 w-8 text-gray-400 mb-2" />
+              <p className="text-sm text-gray-500 mb-2">Click to upload or drag and drop</p>
+              <p className="text-xs text-gray-400">SVG, PNG, JPG or WebP (max. 2MB)</p>
+              <input
+                id="image_file"
+                name="image_file"
+                type="file"
+                accept="image/*"
+                className="w-full h-full opacity-0 absolute cursor-pointer"
+              />
+            </div>
+            {event.image_url && (
+              <div className="mt-2">
+                <p className="text-xs text-gray-500">Current image will be kept if no new image is uploaded</p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
 
       <div className="flex items-center">
         <input
