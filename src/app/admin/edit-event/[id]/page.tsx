@@ -3,13 +3,13 @@ import { redirect } from 'next/navigation';
 import EditEventForm from '@/components/EditEventForm';
 
 interface PageProps {
-  params: Promise<{
+  params: {
     id: string;
-  }>;
+  };
 }
 
 export default async function EditEventPage({ params }: PageProps) {
-  const { id } = await params;
+  const { id } = params;
   
   const supabase = createClient();
 
