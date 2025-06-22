@@ -16,13 +16,14 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const router = useRouter();
 
   useEffect(() => {
-    // Set up auth state change listener to redirect after successful auth
+    // Set up auth state change listener to refresh the page on successful sign-in
     const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event) => {
-      if (event === 'INITIAL_SESSION') {
+      // This event fires when the user successfully signs in.
+      if (event === 'SIGNED_IN') {
         // Close the modal
         onClose();
-        // Redirect to profile page
-        router.push('/profile');
+        // Refresh the page to ensure server components re-render with the new session
+        router.refresh();
       }
     });
 
