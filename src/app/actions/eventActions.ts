@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { v4 as uuidv4 } from 'uuid';
 
 async function verifyAdmin() {
   const supabase = createClient();
@@ -22,48 +23,73 @@ async function verifyAdmin() {
 }
 
 export async function createEvent(formData: FormData) {
-  await verifyAdmin();
+  const user = await verifyAdmin();
   const supabase = createClient();
 
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    throw new Error('You must be logged in to create an event.');
-  }
-
-  // Check if the user is an admin
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.role !== 'admin') {
-    throw new Error('You do not have permission to create an event.');
-  }
-
-  const rawFormData = {
-    title: formData.get('title') as string,
-    description: formData.get('description') as string,
-    date: formData.get('date') as string,
-    location: formData.get('location') as string,
-    price: parseFloat(formData.get('price') as string) || 0,
-    currency: formData.get('currency') as string,
-    image_url: formData.get('image_url') as string,
-    featured: formData.get('featured') === 'on',
-  };
+  // Extract form data
+  const title = formData.get('title') as string;
+  const date = formData.get('date') as string;
+  const location = formData.get('location') as string;
+  const price = parseFloat(formData.get('price') as string) || 0;
+  const currency = formData.get('currency') as string;
+  const featured = formData.get('featured') === 'on';
 
   // Basic validation
-  if (!rawFormData.title || !rawFormData.date || !rawFormData.location) {
+  if (!title || !date || !location) {
     throw new Error('Title, date, and location are required.');
   }
 
+  // Handle image (either URL or file upload)
+  let image_url = formData.get('image_url') as string;
+  const imageFile = formData.get('image_file') as File;
+
+  // If a file was uploaded, store it in Supabase Storage
+  if (imageFile && imageFile.size > 0) {
+    try {
+      // Generate a unique filename
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `event-images/${fileName}`;
+
+      // Upload the file to Supabase Storage
+      const { error: uploadError, data } = await supabase
+        .storage
+        .from('events')
+        .upload(filePath, imageFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
+      }
+
+      // Get the public URL for the uploaded image
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('events')
+        .getPublicUrl(filePath);
+
+      image_url = publicUrl;
+    } catch (error) {
+      console.error('Error processing image upload:', error);
+      throw new Error('Failed to process image upload.');
+    }
+  }
+
+  // Create the event
   const { data, error } = await supabase
     .from('events')
     .insert([
       {
-        ...rawFormData,
-        // The user who creates the event is not stored in the events table
-        // but you could add a `creator_id` column if you wanted to.
+        title,
+        date,
+        location,
+        price,
+        currency,
+        image_url,
+        featured,
       },
     ])
     .select()
@@ -83,23 +109,67 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(eventId: number, formData: FormData) {
-  await verifyAdmin();
+  const user = await verifyAdmin();
   const supabase = createClient();
   
-  const rawFormData = {
-    title: formData.get('title') as string,
-    description: formData.get('description') as string,
-    date: formData.get('date') as string,
-    location: formData.get('location') as string,
-    price: parseFloat(formData.get('price') as string) || 0,
-    currency: formData.get('currency') as string,
-    image_url: formData.get('image_url') as string,
-    featured: formData.get('featured') === 'on',
-  };
+  // Extract form data
+  const title = formData.get('title') as string;
+  const date = formData.get('date') as string;
+  const location = formData.get('location') as string;
+  const price = parseFloat(formData.get('price') as string) || 0;
+  const currency = formData.get('currency') as string;
+  const featured = formData.get('featured') === 'on';
+
+  // Handle image (either URL or file upload)
+  let image_url = formData.get('image_url') as string;
+  const imageFile = formData.get('image_file') as File;
+
+  // If a file was uploaded, store it in Supabase Storage
+  if (imageFile && imageFile.size > 0) {
+    try {
+      // Generate a unique filename
+      const fileExt = imageFile.name.split('.').pop();
+      const fileName = `${uuidv4()}.${fileExt}`;
+      const filePath = `event-images/${fileName}`;
+
+      // Upload the file to Supabase Storage
+      const { error: uploadError } = await supabase
+        .storage
+        .from('events')
+        .upload(filePath, imageFile, {
+          cacheControl: '3600',
+          upsert: false,
+        });
+
+      if (uploadError) {
+        console.error('Error uploading image:', uploadError);
+        throw new Error(`Failed to upload image: ${uploadError.message}`);
+      }
+
+      // Get the public URL for the uploaded image
+      const { data: { publicUrl } } = supabase
+        .storage
+        .from('events')
+        .getPublicUrl(filePath);
+
+      image_url = publicUrl;
+    } catch (error) {
+      console.error('Error processing image upload:', error);
+      throw new Error('Failed to process image upload.');
+    }
+  }
 
   const { error } = await supabase
     .from('events')
-    .update(rawFormData)
+    .update({
+      title,
+      date,
+      location,
+      price,
+      currency,
+      image_url,
+      featured,
+    })
     .eq('id', eventId);
 
   if (error) {

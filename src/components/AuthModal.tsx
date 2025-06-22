@@ -1,10 +1,11 @@
 'use client'
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { createClient } from '@/lib/supabase/client';
 import { X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface AuthModalProps {
   onClose: () => void;
@@ -12,6 +13,23 @@ interface AuthModalProps {
 
 const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
   const supabaseClient = createClient();
+  const router = useRouter();
+
+  useEffect(() => {
+    // Set up auth state change listener to redirect after successful auth
+    const { data: { subscription } } = supabaseClient.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_UP') {
+        // Close the modal
+        onClose();
+        // Redirect to profile page
+        router.push('/profile');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [supabaseClient, onClose, router]);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center">
@@ -28,6 +46,7 @@ const AuthModal: React.FC<AuthModalProps> = ({ onClose }) => {
           theme="light"
           providers={['google']} // Optional: Add social providers
           magicLink
+          redirectTo={`${window.location.origin}/profile`}
         />
       </div>
     </div>

@@ -4,14 +4,16 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Event } from '@/types';
+import { Download, Ticket } from 'lucide-react';
 
 // Define a more specific type for the order based on the query
 type OrderWithEvent = {
   id: number;
   created_at: string;
   quantity: number;
-  total_price: number;
+  total_amount: number;
   status: string;
+  verification_code: string;
   events: Pick<Event, 'id' | 'title' | 'date' | 'image_url' | 'location'>[] | null;
 };
 
@@ -33,8 +35,9 @@ export default async function MyOrdersPage() {
       id,
       created_at,
       quantity,
-      total_price,
+      total_amount,
       status,
+      verification_code,
       events (
         id,
         title,
@@ -88,13 +91,26 @@ export default async function MyOrdersPage() {
                   <div className="mt-4 border-t pt-4 space-y-2 text-sm">
                     <p><strong>Order ID:</strong> {order.id}</p>
                     <p><strong>Quantity:</strong> {order.quantity}</p>
-                    <p><strong>Total Paid:</strong> {formatCurrency(order.total_price || 0, 'NGN')}</p>
+                    <p><strong>Total Paid:</strong> {formatCurrency(order.total_amount || 0, 'NGN')}</p>
                     <p><strong>Status:</strong> <span className="font-semibold capitalize px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs">{order.status}</span></p>
+                    {order.verification_code && (
+                      <p><strong>Verification Code:</strong> <span className="font-mono bg-gray-100 px-2 py-1 rounded">{order.verification_code}</span></p>
+                    )}
                   </div>
                 </div>
-                <div className="self-center">
-                   <Link href={`/events/${event?.id}`} className="px-4 py-2 bg-accent-purple text-white text-sm font-semibold rounded-lg shadow-md hover:bg-accent-purple/90 transition-all">
-                      View Event
+                <div className="self-center flex flex-col space-y-2">
+                  <Link 
+                    href={`/payment/success?orderId=${order.id}`}
+                    className="flex items-center gap-1 px-4 py-2 bg-green-600 text-white text-sm font-semibold rounded-lg shadow-md hover:bg-green-700 transition-all"
+                  >
+                    <Ticket size={16} />
+                    View Ticket
+                  </Link>
+                  <Link 
+                    href={`/events/${event?.id}`} 
+                    className="px-4 py-2 bg-accent-purple text-white text-sm font-semibold rounded-lg shadow-md hover:bg-accent-purple/90 transition-all"
+                  >
+                    View Event
                   </Link>
                 </div>
               </div>
