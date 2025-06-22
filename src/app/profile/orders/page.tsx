@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import type { Event } from '@/types';
-import { Download, Ticket } from 'lucide-react';
+import { Ticket } from 'lucide-react';
 
 // Define a more specific type for the order based on the query
 type OrderWithEvent = {

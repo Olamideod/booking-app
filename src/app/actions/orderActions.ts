@@ -1,6 +1,5 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation';
 import crypto from 'crypto';
 
 // Generate a unique verification code for tickets

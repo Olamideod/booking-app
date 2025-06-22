@@ -23,7 +23,7 @@ async function verifyAdmin() {
 }
 
 export async function createEvent(formData: FormData) {
-  const user = await verifyAdmin();
+  await verifyAdmin();
   const supabase = createClient();
 
   // Extract form data
@@ -52,7 +52,7 @@ export async function createEvent(formData: FormData) {
       const filePath = `event-images/${fileName}`;
 
       // Upload the file to Supabase Storage
-      const { error: uploadError, data } = await supabase
+      const { error: uploadError } = await supabase
         .storage
         .from('events')
         .upload(filePath, imageFile, {
@@ -109,7 +109,7 @@ export async function createEvent(formData: FormData) {
 }
 
 export async function updateEvent(eventId: number, formData: FormData) {
-  const user = await verifyAdmin();
+  await verifyAdmin();
   const supabase = createClient();
   
   // Extract form data
