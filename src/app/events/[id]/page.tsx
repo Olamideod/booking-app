@@ -5,13 +5,13 @@ import AnimatedPage from '@/components/AnimatedPage';
 import { Suspense } from 'react';
 
 interface EventDetailPageProps {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
 const EventDetailPage = async ({ params }: EventDetailPageProps) => {
-  const { id } = await params;
+  const { id } = params;
   
   const supabase = createClient();
   const { data: event } = await supabase

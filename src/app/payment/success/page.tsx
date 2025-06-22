@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import TicketDownload from './ticket-download';
 
-export default async function PaymentSuccessPage({
-  searchParams,
-}: {
+interface PageProps {
+  params: { [key: string]: string };
   searchParams: { [key: string]: string | string[] | undefined };
-}) {
+}
+
+export default async function PaymentSuccessPage({ searchParams }: PageProps) {
   const orderId = searchParams.orderId ? Number(searchParams.orderId) : null;
   
   if (!orderId) {
