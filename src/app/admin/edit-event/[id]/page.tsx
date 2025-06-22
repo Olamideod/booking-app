@@ -2,7 +2,13 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import EditEventForm from '@/components/EditEventForm';
 
-export default async function EditEventPage({ params }: { params: { id: string } }) {
+interface EditEventPageProps {
+  params: {
+    id: string;
+  };
+}
+
+export default async function EditEventPage({ params }: EditEventPageProps) {
   const supabase = createClient();
 
   const {
