@@ -42,7 +42,7 @@ export default function EventsPageClient({ events, searchQuery }: EventsPageClie
           animate="visible"
         >
           {events?.map(event => (
-            <EventCard key={event.id} event={event as any} />
+            <EventCard key={event.id} event={event} />
           ))}
         </motion.div>
         {(!events || events.length === 0) && (

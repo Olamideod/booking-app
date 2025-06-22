@@ -1,6 +1,4 @@
-import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { createClient as createSupabaseClient } from '@supabase/supabase-js'
-import { cookies } from 'next/headers';
 
 // Instructions for Supabase Service Role Key:
 // 1. Go to your Supabase project dashboard.

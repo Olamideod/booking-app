@@ -9,7 +9,7 @@ const HeroSection = () => {
           Find something great to do.
         </h1>
         <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-300">
-          Discover the world's best nightlife, music, cultural, business and social events.
+          Discover the world&apos;s best nightlife, music, cultural, business and social events.
         </p>
         <div className="mt-8">
           <Link href="/events" className="btn-primary">

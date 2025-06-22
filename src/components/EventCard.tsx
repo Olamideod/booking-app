@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { Event } from '@/types';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { motion } from 'framer-motion';
@@ -27,7 +28,13 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
       <Link href={`/events/${event.id}`} className={isPastEvent ? 'pointer-events-none' : ''}>
         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 transform hover:-translate-y-1 relative">
           <div className="relative">
-            <img className="w-full h-48 object-cover" src={imageUrl} alt={event.title} />
+            <Image
+              className="w-full h-48 object-cover"
+              src={imageUrl}
+              alt={event.title}
+              width={800}
+              height={600}
+            />
             {(event.sold_out || isPastEvent) && (
               <div className="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
                 SOLD OUT

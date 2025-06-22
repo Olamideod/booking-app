@@ -1,6 +1,16 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { formatCurrency } from '@/utils/formatCurrency';
+import { Event } from '@/types';
+
+type OrderWithEvent = {
+  id: number;
+  created_at: string;
+  status: string;
+  quantity: number;
+  total_price: number;
+  events: Pick<Event, 'id' | 'title' | 'date' | 'location'>[];
+}
 
 export default async function ProfilePage() {
   const supabase = createClient();
@@ -48,8 +58,10 @@ export default async function ProfilePage() {
         <h2 className="text-2xl font-bold text-dark-purple mb-4">Order History</h2>
         {orders && orders.length > 0 ? (
           <div className="space-y-6">
-            {orders.map((order) => {
-              const event = order.events as any; // Cast because of Supabase join type
+            {(orders as OrderWithEvent[]).map((order) => {
+              const event = order.events[0];
+              if (!event) return null;
+              
               return (
                 <div key={order.id} className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
                   <div>
@@ -74,7 +86,7 @@ export default async function ProfilePage() {
             })}
           </div>
         ) : (
-          <p className="text-gray-500">You haven't purchased any tickets yet.</p>
+          <p className="text-gray-500">You haven&apos;t purchased any tickets yet.</p>
         )}
       </div>
     </div>

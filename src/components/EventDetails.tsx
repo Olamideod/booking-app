@@ -7,6 +7,7 @@ import type { Event } from '@/types';
 import { formatCurrency } from '@/utils/formatCurrency';
 import { Minus, Plus, Edit, Trash2 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 
 interface EventDetailsProps {
@@ -80,7 +81,14 @@ const EventDetails: React.FC<EventDetailsProps> = ({ event }) => {
 
   return (
     <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-      <img className="w-full h-96 object-cover" src={imageUrl} alt={event.title} />
+      <Image
+        className="w-full h-96 object-cover"
+        src={imageUrl}
+        alt={event.title}
+        width={1200}
+        height={800}
+        priority
+      />
       <div className="p-8 relative">
         {profile?.role === 'admin' && (
           <div className="absolute top-4 right-4 bg-white/80 backdrop-blur-sm p-2 rounded-lg border shadow-sm">
