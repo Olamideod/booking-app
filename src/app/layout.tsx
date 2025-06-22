@@ -25,7 +25,7 @@ export default function RootLayout({
         <AuthProvider>
           <Navbar />
           <main className="flex-grow">
-            <AnimatedPage>{children}</AnimatedPage>
+            {children}
           </main>
           <Toaster />
           <Footer />

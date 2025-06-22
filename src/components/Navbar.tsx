@@ -3,7 +3,7 @@
 import { useAuth } from '@/context/AuthContext';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import { Suspense, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import AuthModal from './AuthModal';
 import Search from './Search';
@@ -41,7 +41,9 @@ export default function Navbar() {
               <Link href="/events" className="text-sm font-medium text-gray-700 hover:text-accent-purple">
                 Browse Events
               </Link>
-              <Search />
+              <Suspense fallback={<div className="w-full max-w-xs h-10"></div>}>
+                <Search />
+              </Suspense>
             </div>
           </div>
 

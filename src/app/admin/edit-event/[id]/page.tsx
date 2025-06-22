@@ -2,10 +2,15 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import EditEventForm from '@/components/EditEventForm';
 
-// The 'any' type is used here as a workaround for a build error
-// where PageProps is being constrained to an incorrect type.
-export default async function EditEventPage({ params }: any) {
-  const { id } = params as { id: string };
+interface PageProps {
+  params: Promise<{
+    id: string;
+  }>;
+}
+
+export default async function EditEventPage({ params }: PageProps) {
+  const { id } = await params;
+  
   const supabase = createClient();
 
   const {

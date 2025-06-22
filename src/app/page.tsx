@@ -3,47 +3,47 @@ import HeroSection from "@/components/HeroSection";
 import { createClient } from "@/lib/supabase/server";
 import { dummyEvents } from '@/lib/dummy-data';
 import type { Event } from '@/types';
+import AnimatedPage from '@/components/AnimatedPage';
 
 export const revalidate = 60; // Revalidate every 60 seconds
 
-async function FeaturedEvents() {
+async function getEvents() {
   const supabase = createClient();
   const { data, error } = await supabase
     .from('events')
     .select('*')
-    .eq('featured', true)
-    .limit(3);
-  let events = data;
-
+    .limit(6);
+  
   if (error) {
-    console.error('Error fetching featured events:', error.message);
+    console.error('Error fetching events:', error.message);
+    return dummyEvents.slice(0, 6) as Event[];
   }
-
-  // Fallback to dummy data if fetch fails or returns no events
-  if (!events || events.length === 0) {
-    console.log('No featured events found, falling back to dummy data.');
-    events = dummyEvents.filter(e => e.featured).slice(0, 3) as Event[];
+  
+  // Fallback to dummy data if fetch returns no events
+  if (!data || data.length === 0) {
+    console.log('No events found, falling back to dummy data.');
+    return dummyEvents.slice(0, 6) as Event[];
   }
-
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      {events.map(event => (
-        <EventCard key={event.id} event={event} />
-      ))}
-    </div>
-  );
+  
+  return data as Event[];
 }
 
-export default function Home() {
+export default async function Home() {
+  const events = await getEvents();
+  
   return (
-    <main>
-      <HeroSection />
-      <div className="bg-black text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl font-bold text-center mb-8">Featured Events</h2>
-          <FeaturedEvents />
-        </div>
+    <AnimatedPage>
+      <div className="container mx-auto px-4">
+        <HeroSection />
+        <section className="py-12">
+          <h2 className="text-3xl font-bold mb-8 text-center">Featured Events</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </section>
       </div>
-    </main>
+    </AnimatedPage>
   );
 }

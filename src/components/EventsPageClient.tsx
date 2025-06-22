@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import type { Event } from '@/types';
 import EventCard from '@/components/EventCard';
 import EventFilters from '@/components/EventFilters';
+import { Suspense } from 'react';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,7 +35,9 @@ export default function EventsPageClient({ events, searchQuery }: EventsPageClie
                 Showing {events.length} event{events.length > 1 ? 's' : ''}
             </p>
         )}
-        <EventFilters />
+        <Suspense fallback={<div className="h-10 mb-8"></div>}>
+          <EventFilters />
+        </Suspense>
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
           variants={containerVariants}
