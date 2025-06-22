@@ -1,18 +1,18 @@
+// File: src/app/admin/edit-event/[id]/page.tsx
+
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import EditEventForm from '@/components/EditEventForm';
 
-interface PageProps {
-  params: {
-    id: string;
-  };
+interface EditEventPageProps {
+  params: { id: string };
 }
 
-export default async function EditEventPage({ params }: PageProps) {
+export default async function EditEventPage({ params }: EditEventPageProps) {
   const { id } = params;
-  
   const supabase = createClient();
 
+  // Check if user is authenticated
   const {
     data: { user },
   } = await supabase.auth.getUser();
@@ -21,7 +21,7 @@ export default async function EditEventPage({ params }: PageProps) {
     redirect('/?error=unauthenticated');
   }
 
-  // Check for admin role
+  // Fetch user profile to check role
   const { data: profile } = await supabase
     .from('profiles')
     .select('role')
@@ -31,8 +31,8 @@ export default async function EditEventPage({ params }: PageProps) {
   if (profile?.role !== 'admin') {
     redirect('/?error=unauthorized');
   }
-  
-  // Fetch the event to edit
+
+  // Fetch the event
   const { data: event, error } = await supabase
     .from('events')
     .select('*')
@@ -40,7 +40,6 @@ export default async function EditEventPage({ params }: PageProps) {
     .single();
 
   if (error || !event) {
-    // This could be a 404 not found page in a real app
     redirect('/events?error=notfound');
   }
 
@@ -52,4 +51,4 @@ export default async function EditEventPage({ params }: PageProps) {
       </div>
     </div>
   );
-} 
+}
