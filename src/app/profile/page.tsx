@@ -1,5 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { formatCurrency } from '@/utils/formatCurrency';
 
 export default async function ProfilePage() {
   const supabase = createClient();
@@ -7,30 +8,74 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login'); // Or redirect to a specific login page
+    redirect('/login');
   }
 
-  // TODO: Fetch profile details from the 'profiles' table
-  // const { data: profile } = await supabase
-  //   .from('profiles')
-  //   .select('*')
-  //   .eq('id', user.id)
-  //   .single();
+  // Fetch the user's orders and the details of the associated event
+  const { data: orders, error } = await supabase
+    .from('orders')
+    .select(`
+      id,
+      created_at,
+      status,
+      quantity,
+      total_price,
+      events (
+        id,
+        title,
+        date,
+        location
+      )
+    `)
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching orders:', error);
+  }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-      <h1 className="text-4xl font-bold text-dark-purple mb-8">User Profile</h1>
-      <div className="bg-white p-8 rounded-lg shadow-md">
+    <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
+      <h1 className="text-4xl font-bold text-dark-purple mb-8">My Profile</h1>
+      <div className="bg-white p-8 rounded-lg shadow-md mb-8">
+        <h2 className="text-2xl font-bold text-dark-purple mb-4">Account Details</h2>
         <p className="text-lg">
           <span className="font-semibold">Email:</span> {user.email}
         </p>
-        <p className="text-lg mt-2">
-          <span className="font-semibold">User ID:</span> {user.id}
-        </p>
-        <p className="mt-6 text-gray-500">
-          This is your profile page. More details, like your name and past orders, will be shown here soon.
-        </p>
-        {/* TODO: Add form to edit profile details */}
+      </div>
+
+      <div className="bg-white p-8 rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold text-dark-purple mb-4">Order History</h2>
+        {orders && orders.length > 0 ? (
+          <div className="space-y-6">
+            {orders.map((order) => {
+              const event = order.events as any; // Cast because of Supabase join type
+              return (
+                <div key={order.id} className="border border-gray-200 rounded-lg p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center">
+                  <div>
+                    <h3 className="text-xl font-bold text-accent-purple">{event.title}</h3>
+                    <p className="text-sm text-gray-500 mt-1">
+                      {new Date(event.date).toLocaleDateString()} - {event.location}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      Order Placed: {new Date(order.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="mt-4 sm:mt-0 sm:text-right">
+                    <p className="text-lg font-semibold">
+                      {formatCurrency(order.total_price, 'NGN')} {/* Assuming default, adjust as needed */}
+                    </p>
+                    <p className="text-sm text-gray-500">
+                      {order.quantity} ticket(s) - <span className="font-medium text-green-600">{order.status}</span>
+                    </p>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <p className="text-gray-500">You haven't purchased any tickets yet.</p>
+        )}
       </div>
     </div>
   );

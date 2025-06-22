@@ -33,8 +33,11 @@ export async function POST(request: Request) {
     return new NextResponse('Event not found', { status: 404 });
   }
 
+  // The amount should be in the smallest currency unit (kobo)
+  const amountInKobo = Math.round(event.price * quantity * 100);
+  const callbackUrl = `${process.env.NEXT_PUBLIC_APP_URL}/payment/status`;
+
   // 3. Prepare Paystack transaction
-  const amount = event.price * quantity * 100; // Paystack expects amount in kobo/cents
   const paystackUrl = 'https://api.paystack.co/transaction/initialize';
   const paystackSecretKey = process.env.PAYSTACK_SECRET_KEY!;
 
@@ -46,14 +49,14 @@ export async function POST(request: Request) {
     },
     body: JSON.stringify({
       email: user.email,
-      amount,
+      amount: amountInKobo,
       currency: event.currency,
       metadata: {
         user_id: user.id,
         event_id: eventId,
         quantity,
       },
-      callback_url: `${process.env.NEXT_PUBLIC_APP_URL}/payment-confirmation`,
+      callback_url: callbackUrl,
     }),
   });
 

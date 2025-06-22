@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 const HeroSection = () => {
   return (
@@ -11,12 +12,9 @@ const HeroSection = () => {
           Discover the world's best nightlife, music, cultural, business and social events.
         </p>
         <div className="mt-8">
-          <a
-            href="#"
-            className="inline-block bg-black border border-transparent rounded-md py-3 px-8 font-medium text-dark-purple hover:bg-gray-900 transition-colors"
-          >
+          <Link href="/events" className="btn-primary">
             Find an event
-          </a>
+          </Link>
         </div>
       </div>
     </div>

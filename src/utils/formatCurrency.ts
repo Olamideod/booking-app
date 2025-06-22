@@ -1,6 +1,12 @@
-export function formatCurrency(amount: number, currency: 'NGN' | 'GBP'): string {
+export function formatCurrency(price: number, currency: string) {
+  if (price === 0) {
+    return 'Free';
+  }
+
   return new Intl.NumberFormat('en-US', {
     style: 'currency',
-    currency: currency,
-  }).format(amount);
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(price);
 } 
