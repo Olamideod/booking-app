@@ -11,7 +11,7 @@ export default async function EditEventPage({ params }: any) {
   const { id } = params as { id: string };
   const supabase = createClient();
 
-  // Check if user is authenticated
+  // Check if user is fixed
   const {
     data: { user },
   } = await supabase.auth.getUser();
