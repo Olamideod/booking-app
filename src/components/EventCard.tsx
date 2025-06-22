@@ -57,10 +57,10 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
                 {isPastEvent ? 'PAST EVENT' : 'SOLD OUT'}
               </div>
             )}
-            {isPastEvent && <div className="absolute inset-0 bg-white/50"></div>}
+            {isPastEvent && <div className="absolute inset-0 bg-white/30"></div>}
           </div>
           <div className="p-4">
-            <h3 className="text-lg font-bold text-purple">{event.title}</h3>
+            <h3 className="text-lg font-bold text-black">{event.title}</h3>
             <p className="text-sm text-gray-600 mt-1">{new Date(event.date).toLocaleDateString()}</p>
             <p className="text-sm text-gray-500">{event.location}</p>
             <div className="mt-4 flex justify-between items-center">

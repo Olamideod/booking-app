@@ -3,7 +3,8 @@
 import { useAuth } from '@/context/AuthContext';
 import { Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { Suspense, useState } from 'react';
+import { Suspense, useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { toast } from 'react-hot-toast';
 import AuthModal from './AuthModal';
 import Search from './Search';
@@ -12,6 +13,13 @@ import { UserNav } from './UserNav';
 export default function Navbar() {
   const { user, profile, loading, showAuthModal, setShowAuthModal, supabase } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('error') === 'unauthenticated') {
+      setShowAuthModal(true);
+    }
+  }, [searchParams, setShowAuthModal]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();

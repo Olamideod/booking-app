@@ -18,7 +18,7 @@ export default async function ProfilePage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect('/login');
+    redirect('/?error=unauthenticated');
   }
 
   // Fetch the user's orders and the details of the associated event
